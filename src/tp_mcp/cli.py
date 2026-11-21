@@ -155,7 +155,7 @@ def cmd_auth_clear() -> int:
 
 
 def cmd_serve() -> int:
-    """Start the MCP server.
+    """Start the MCP server (stdio).
 
     Returns:
         Exit code.
@@ -163,6 +163,19 @@ def cmd_serve() -> int:
     from tp_mcp.server import run_server
 
     return run_server()
+
+
+def cmd_serve_http() -> int:
+    """Start the MCP server over Streamable HTTP (Railway / Pacific).
+
+    Clients send the athlete cookie as header X-TP-Auth-Cookie.
+
+    Returns:
+        Exit code.
+    """
+    from tp_mcp.http_server import run_http_server
+
+    return run_http_server()
 
 
 def cmd_config() -> int:
@@ -210,13 +223,15 @@ def cmd_help() -> int:
     print("  auth-status           Check authentication status")
     print("  auth-clear            Clear stored cookie")
     print("  config                Output Claude Desktop config snippet")
-    print("  serve                 Start the MCP server")
+    print("  serve                 Start the MCP server (stdio)")
+    print("  serve-http            Start Streamable HTTP MCP (Railway)")
     print("  help                  Show this help message")
     print()
     print("Examples:")
     print("  tp-mcp auth                      # Manual cookie entry")
     print("  tp-mcp auth --from-browser auto  # Auto-detect browser")
     print("  tp-mcp auth --from-browser chrome")
+    print("  tp-mcp serve-http                # HTTP for Pacific / Railway")
     print()
     return 0
 
@@ -250,6 +265,7 @@ def main() -> int:
         "auth-clear": cmd_auth_clear,
         "config": cmd_config,
         "serve": cmd_serve,
+        "serve-http": cmd_serve_http,
         "help": cmd_help,
         "--help": cmd_help,
         "-h": cmd_help,

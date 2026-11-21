@@ -74,14 +74,29 @@ def get_credential() -> CredentialResult:
     """Retrieve the TrainingPeaks auth cookie.
 
     Checks in order:
-    1. TP_AUTH_COOKIE environment variable (supported auth method for
+    1. Per-request HTTP header cookie (X-TP-Auth-Cookie), when serving HTTP
+    2. TP_AUTH_COOKIE environment variable (supported auth method for
        headless servers, containers, and CI)
-    2. System keyring
-    3. Encrypted file
+    3. System keyring
+    4. Encrypted file
 
     Returns:
         CredentialResult with cookie if found.
     """
+    # HTTP MCP: cookie from the current request / session (Pacific admin paste)
+    try:
+        from tp_mcp.auth.request_cookie import get_request_cookie
+
+        request_cookie = get_request_cookie()
+        if request_cookie:
+            return CredentialResult(
+                success=True,
+                message="Credential from request header",
+                cookie=request_cookie,
+            )
+    except Exception:
+        pass
+
     # Check environment variable first (supported headless/container/CI
     # auth path; takes precedence over stored credentials)
     env_cookie = os.environ.get(ENV_VAR_NAME)
